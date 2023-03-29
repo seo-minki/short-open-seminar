@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ko">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Shallow Copy & Deep Copy</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/dracula.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h1>Shallow Copy & Deep Copy</h1>
+				</section>
+
+				<section data-transition="zoom">
+					<section id="fragments">
+						<h2>목차</h2>
+						<ul>
+							<li class="fragment">자바스크립트의 데이터 타입</li>
+							<br>
+							<li class="fragment">얕은 복사</li>
+							<br>
+							<li class="fragment">깊은 복사</li>
+							<br>
+							<li class="fragment">Q&A</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<h2>자바스크립트의 데이터 타입</h2>
+					<div id="fragments">
+						<h3>원시타입</h3>
+						<p>
+							<b>원시타입</b>은 모두 하나의 <b>값</b>들 담고 있다. 값 자체에 대한 변경이 불가능하지만, 변수에 데이터를 재할당할 수 있다.
+							<br>
+							즉 원시값을 교체할 수는 있지만, 직접 변형이 안 된다.
+						</p>
+						
+						<pre class="fragment fade-up"><code>
+							let name = 'minki';
+							console.log(name); // minki
+
+							name.toUpperCase();
+							console.log(name); // minki
+
+							name = name.toUpperCase();
+							console.log(minki); // MINKI
+						</code></pre>
+					</div>
+				</section>
+
+				<section>
+					<img data-src="image/primitive_img.png">
+				</section>
+
+				<section>
+					<h2>자바스크립트의 데이터 타입</h2>
+					<div id="fragments">
+						<h3>참조타입</h3>
+						<p>
+							<b>참조타입</b>의 데이터는 별도의 메모리 공간에 저장되며 변수에 할당 시 데이터에 대한 주소가 저장되기 때문에 메모리 주소를 참조해 접근이 가능하다.
+							<br>
+							즉 참조타입의 변수는 실제 데이터가 저장되는 주소를 참조하기에 참조타입이라고 불린다.
+						</p>
+						
+						<pre class="fragment fade-up"><code>
+							let member = [];
+							let copyMember = member;
+
+							copyMember.push('minki');
+							console.log(member); // ['minki'];
+							console.log(copyMember); // ['minki'];
+						</code></pre>
+					</div>
+				</section>
+
+				<section>
+					<img data-src="image/reference_img.png">
+				</section>
+				<!-- 얕은 복사 -->
+				<section>
+					<h3>
+						얕은 복사(shallow copy) 방법
+					</h3>
+
+					<section>
+						<p>객체 직접 대입</p>
+						<pre><code>
+							let obj = {a : 1, b : 2};
+							let copyObj = obj;
+							obj.a = 3;
+							console.log(copyObj.a) // 3;
+							copyObj.b = 4;
+							console.log(obj); // { a : 3, b : 4};
+						</code></pre>
+					</section>
+					
+					<section>
+						<p>Object.assign() 메소드를 통한 복사</p>
+						<span>* 1depth까지 깊은 복사</span>
+						<pre>
+							<code data-line-numbers="2-5|7-16|17-18">							
+							let info = { name : 'minki', age : 28 };
+							let copyInfo = Object.assign({}, info);
+							info.name = 'seominki';
+							console.log(info === copyInfo); // false
+	
+							let memberInfo = {
+								name : 'minki',
+								age : 28,
+								contact : {
+									email : 'minki@paymint.co.kr',
+									phone : '01066747210'
+								}
+							};
+	
+							let copyMemberInfo = Object.assign({}, memberInfo);
+							copyMemberInfo.contact.phone = '12345678';
+							console.log(memberInfo.contact === copyMemberInfo.contact); // true
+							</code>
+						</pre>
+					</section>
+
+					<section>
+						<p>…(spread) 연산자를 통한 복사</p>
+						<span>* 1depth까지 깊은 복사</span>
+						<pre><code>
+							let obj = { a : 1, b : 2};
+							let copyObj = { ...obj};
+							obj.a = 100;
+							console.log(obj === copyObj); // false
+						</code></pre>
+					</section>
+				</section>
+				<!-- 깊은 복사 -->
+				<section>
+					<h3>깊은 복사(deep copy) 방법</h3>
+
+					<section>
+						<p>JSON method</p>
+						<pre><code>
+							let original = {profile: {name:'철수', age:12}, grade: 'A'};
+							let clone = JSON.parse(JSON.stringify(original));
+
+							clone.profile.name = '영희';
+							clone.grade = 'B';
+
+							console.log(original) // {profile: {name: '철수', age: 12}, grade: 'A'}
+							console.log(clone); // {profile: {name: '영희', age: 12}, grade: 'B'}
+						</code></pre>
+					</section>
+
+					<section>
+						<p>재귀함수를 통한 깊은 복사</p>
+						<pre><code>
+							let original = {info: {name:'철수', age:12}, grade: 'A'};
+
+							function isCopyObj(origin){
+								let result = {};
+
+								for(let key in origin){
+									if(typeof origin[key] === 'object'){
+										result[key] = isCopyObj(origin[key]);
+									} else {
+										result[key] = origin[key];
+									}
+								}
+
+								return result;
+							}
+
+							let copy = isCopyObj(original);
+							copy.info.name = '영희';
+							console.log(original.info); // {name : '철수', age: 12};
+							console.log(copy.info); // {name : '영희', age : 12};
+						</code></pre>
+					</section>
+
+					<section>
+						<p>loadsh 라이브러리를 사용한 깊은 복사</p>
+						<pre><code>
+							let obj = { 
+								a : 10, 
+								b: {
+									c : 20,
+									d : 30
+								}
+							};
+
+							let copy = _.cloneDeep(obj);
+						</code></pre>
+					</section>
+						
+					<section>
+						<p>structuredClone 자바스크립트에서 깊은 복사를 위한 내장 기능 추가</p>
+						<pre><code>
+							let obj = {
+								a : 10, 
+								b: {
+									c : 20,
+									d : 30
+								}
+							};
+
+							let copyObj = structuredClone(obj);
+
+							console.log(obj === copyObj); // false
+						</code></pre>
+					</section>
+				</section>
+
+				<section data-transition="convex">
+					<h1>Q & A</h1>
+				</section>
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+
+		<script>
+		</script>
+	</body>
+</html>
